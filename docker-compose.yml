@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: redis-stack
+    ports:
+      - "6379:6379"
+
+  node:
+    image: node:latest
+    depends_on:
+      - redis
+    working_dir: /usr/src/app
+    volumes:
+      - ./main_redis.js:/usr/src/app/main_redis.js
+    command: sh -c "npm install redis && node main_redis.js"
+
+  python:
+    image: python:3.10-slim
+    depends_on:
+      - redis
+    working_dir: /usr/src/app
+    volumes:
+      - ./test_redis.py:/usr/src/app/test_redis.py
+    command: sh -c "pip install redis && python test_redis.py"
+
